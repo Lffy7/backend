@@ -1,0 +1,37 @@
+#!/bin/bash -e
+red=`tput setaf 1` green=`tput setaf 2` yellow=`tput setaf 3` reset=`tput sgr0`
+die() { echo "$@" >&2 ; exit 2;}
+(return 0 2>/dev/null) || die "${yellow}must be sourced, not run as a seperate command:${reset} . $0"
+
+
+#setup some environment variables
+export local_home=$(realpath -- $(dirname -- "${BASH_SOURCE[0]}")/..)
+export PATH="$PATH:${local_home}/bin"
+
+if [ -d "${local_home}/int" ]; then
+
+# activate environment 2>&1 == 2>/dev/null
+. ${local_home}/int/backend-engine/bin/activate
+export TMPPYTHONPATH="${PYTHONPATH}"
+export PYTHONPATH="${PYTHONPATH}:${local_home}/api/app/modules/"
+
+alias close="deactivate && export PYTHONPATH='${TMPPYTHONPATH}' && export TMPPYTHONPATH='' "
+alias bye="deactivate && export PYTHONPATH='${TMPPYTHONPATH}' && export TMPPYTHONPATH='' "
+alias run="python $@"
+alias serve="uvicorn --host 0.0.0.0 --reload --port 9800 $@"
+alias closeport="fuser -k 9800/tcp"
+welcome=$(python --version 2>&1)
+
+echo "${yellow}Welcome to Python Virtual Environment: ${green}$welcome${reset}"
+echo "(backend-engine) $ type ${green}close|bye${reset} to exit the virtual environment"
+echo "(backend-engine) $ type ${green}run${reset} <python.py> program to test script"
+echo "(backend-engine) $ type ${green}serve${reset} httpserver:parish program to test script"
+
+else
+# initial virtual environment since this is the first time it is run
+
+echo "${yellow}Initializing New Virtual Environment${reset}"
+. "${local_home}"/bin/createnv
+
+fi
+

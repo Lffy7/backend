@@ -1,0 +1,6 @@
+#!/bin/bash -e
+
+root=$(dirname -- "${BASH_SOURCE[0]}")/..
+#mkdir -p "${root}/n0de"
+python -m venv "${root}/int/backend-engine"
+. "${root}"/bin/bootenv
